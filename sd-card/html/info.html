@@ -129,7 +129,7 @@ table {
 			</td>
 		</tr>
 		<tr>
-			<td>WLAN SSID:</td>	
+			<td id="wlan-ssid-label">WLAN SSID:</td>	
 			<td>
 				<output id="wlan-ssid"></output>
 			</td>
@@ -359,7 +359,13 @@ Copyright &copy; 2020 - 2024 by <a href="https://github.com/jomjol/AI-on-the-edg
 		var xhttp = new XMLHttpRequest();
 		xhttp.onreadystatechange = function() {
 			if (this.readyState == 4 && this.status == 200) {
- 				document.getElementById("wlan-ssid").value = xhttp.response;
+				if (xhttp.response == "Ethernet") { // Ethernet boards report no SSID
+					document.getElementById("wlan-ssid-label").innerHTML = "Network:";
+					document.getElementById("wlan-ssid").value = "LAN (Ethernet)";
+				}
+				else {
+					document.getElementById("wlan-ssid").value = xhttp.response;
+				}
 			}
 		}
 		xhttp.open("GET", url, true);

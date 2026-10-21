@@ -6,3 +6,5 @@ Default Value: `undefined`
 
 Hostname for the device.
 It gets automatically transferred to `/wlan.ini` on the SD-Card at the next startup.
+
+On Ethernet boards (ESP32-S3-ETH) the hostname is used for the LAN connection (DHCP, mDNS) in the same way. Default there: `watermeter`.

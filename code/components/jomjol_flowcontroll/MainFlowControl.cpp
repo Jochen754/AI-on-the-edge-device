@@ -539,8 +539,10 @@ esp_err_t handler_openmetrics(httpd_req_t *req)
         // CPU Temperature
         response += createMetric(metricNamePrefix + "_cpu_temperature_celsius", "current cpu temperature in celsius", "gauge", std::to_string((int)temperatureRead())); 
 
+#ifndef NETWORK_ETHERNET
         // WiFi signal strength
         response += createMetric(metricNamePrefix + "_rssi_dbm", "current WiFi signal strength in dBm", "gauge", std::to_string(get_WIFI_RSSI())); 
+#endif
 
         // memory info
         response += createMetric(metricNamePrefix + "_memory_heap_free_bytes", "available heap memory", "gauge", std::to_string(getESPHeapSize())); 
@@ -1484,6 +1486,7 @@ esp_err_t handler_cputemp(httpd_req_t *req)
     return ESP_OK;
 }
 
+#ifndef NETWORK_ETHERNET // No WiFi signal on Ethernet boards
 esp_err_t handler_rssi(httpd_req_t *req)
 {
 #ifdef DEBUG_DETAIL_ON
@@ -1507,6 +1510,7 @@ esp_err_t handler_rssi(httpd_req_t *req)
 
     return ESP_OK;
 }
+#endif // NETWORK_ETHERNET
 
 esp_err_t handler_current_date(httpd_req_t *req)
 {
@@ -1718,8 +1722,10 @@ void task_autodoFlow(void *pvParameter)
         // CPU Temp -> Logfile
         LogFile.WriteToFile(ESP_LOG_DEBUG, TAG, "CPU Temperature: " + std::to_string((int)temperatureRead()) + "°C");
 
+#ifndef NETWORK_ETHERNET
         // WIFI Signal Strength (RSSI) -> Logfile
         LogFile.WriteToFile(ESP_LOG_DEBUG, TAG, "WIFI Signal (RSSI): " + std::to_string(get_WIFI_RSSI()) + "dBm");
+#endif
 
         // Check if time is synchronized (if NTP is configured)
         if (getUseNtp() && !getTimeIsSet())
@@ -1827,6 +1833,7 @@ void register_server_main_flow_task_uri(httpd_handle_t server)
     camuri.user_ctx = (void *)"Light Off";
     httpd_register_uri_handler(server, &camuri);
 
+#ifndef NETWORK_ETHERNET
     // Legacy API => New: "/rssi"
     camuri.uri = "/rssi.html";
     camuri.handler = APPLY_BASIC_AUTH_FILTER(handler_rssi);
@@ -1837,6 +1844,7 @@ void register_server_main_flow_task_uri(httpd_handle_t server)
     camuri.handler = APPLY_BASIC_AUTH_FILTER(handler_rssi);
     camuri.user_ctx = (void *)"Light Off";
     httpd_register_uri_handler(server, &camuri);
+#endif // NETWORK_ETHERNET
 
     camuri.uri = "/date";
     camuri.handler = APPLY_BASIC_AUTH_FILTER(handler_current_date);

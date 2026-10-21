@@ -30,6 +30,8 @@
 #include "statusled.h"
 #include "server_ota.h"
 #include "basic_auth.h"
+#include "connect_wlan.h"
+#include "read_wlanini.h"
 
 #include "lwip/err.h"
 #include "lwip/sys.h"
@@ -60,6 +62,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base,
 }
 
 
+#ifndef NETWORK_ETHERNET // Ethernet boards serve the setup pages via LAN (see CheckStartAPMode)
 void wifi_init_softAP(void)
 {
     ESP_ERROR_CHECK(esp_netif_init());
@@ -94,13 +97,20 @@ void wifi_init_softAP(void)
     ESP_LOGI(TAG, "started with SSID \"%s\", password: \"%s\", channel: %d. Connect to AP and open http://192.168.4.1",
              EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS, EXAMPLE_ESP_WIFI_CHANNEL);
 }
+#endif // NETWORK_ETHERNET
 
 
 void SendHTTPResponse(httpd_req_t *req)
 {
+#ifdef NETWORK_ETHERNET
+    std::string message = "<h1>AI-on-the-edge - BASIC SETUP</h1><p>This is a minimal server (reachable via LAN) to setup the minimum required files on the device and the SD-card. ";
+    message += "This mode is always started if the file /config/config.ini is missing.<p>";
+    message += "The setup is done in 2 steps: 1. upload full inital configuration (sd-card content), 2. reboot<p><p>";
+#else
     std::string message = "<h1>AI-on-the-edge - BASIC SETUP</h1><p>This is an access point with a minimal server to setup the minimum required files and information on the device and the SD-card. ";
     message += "This mode is always started if one of the following files is missing: /wlan.ini or the /config/config.ini.<p>";
     message += "The setup is done in 3 steps: 1. upload full inital configuration (sd-card content), 2. store WLAN access information, 3. reboot (and connect to WLANs)<p><p>";
+#endif
     message += "Please follow the below instructions.<p>";
     httpd_resp_send_chunk(req, message.c_str(), strlen(message.c_str()));
 
@@ -129,6 +139,7 @@ void SendHTTPResponse(httpd_req_t *req)
         httpd_resp_send_chunk(req, message.c_str(), strlen(message.c_str()));
         return;
     }
+#ifndef NETWORK_ETHERNET // wlan.ini is optional on Ethernet boards
     if (!isWlanINI)
     {
         message = "<h3>2. WLAN access credentials</h3><p>";
@@ -156,10 +167,17 @@ void SendHTTPResponse(httpd_req_t *req)
         httpd_resp_send_chunk(req, message.c_str(), strlen(message.c_str()));
         return;
     }
+#endif // NETWORK_ETHERNET
 
+#ifdef NETWORK_ETHERNET
+    message = "<h3>2. Reboot</h3><p>";
+    message += "After triggering the reboot, the zip-files gets extracted and written to the sd-card.<br>The ESP32 will restart two times and then reconnect via LAN. Please find the IP in your router settings (hostname \"watermeter\" or as set in wlan.ini).<p>";
+    message += "The first update and initialization process can take up to 3 minutes. Error logs can be found on the console / serial logout.<p>Have fun!<p>";
+#else
     message = "<h3>3. Reboot</h3><p>";
     message += "After triggering the reboot, the zip-files gets extracted and written to the sd-card.<br>The ESP32 will restart two times and then connect to your access point. Please find the IP in your router settings and access it with the new ip-address.<p>";
     message += "The first update and initialization process can take up to 3 minutes before you find it in the wlan. Error logs can be found on the console / serial logout.<p>Have fun!<p>";
+#endif
     message += "<button class=\"button\" type=\"button\" onclick=\"rb()\")>Reboot to first setup.</button>";
     message += "<script language=\"JavaScript\">async function rb(){";
     message += "api = \"/reboot\";";
@@ -514,6 +532,21 @@ void CheckStartAPMode()
     if (!isWlanINI)
         ESP_LOGW(TAG, "wlan.ini not found!");
 
+#ifdef NETWORK_ETHERNET
+    // No access point on Ethernet boards: the same setup pages are served over the LAN
+    // (DHCP or static IP from wlan.ini). wlan.ini itself is optional.
+    if (!isConfigINI)
+    {
+        ESP_LOGI(TAG, "Starting setup mode via Ethernet");
+        StatusLED(AP_OR_OTA, 2, true);
+        LoadWlanFromFile(WLAN_CONFIG_FILE);
+        wifi_init_sta();
+        start_webserverAP();
+        while(1) { // wait until reboot within task_do_Update_ZIP
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+        }
+    }
+#else
     if (!isConfigINI || !isWlanINI)
     {
         ESP_LOGI(TAG, "Starting access point for remote configuration");
@@ -524,6 +557,7 @@ void CheckStartAPMode()
             vTaskDelay(1000 / portTICK_PERIOD_MS);
         }
     }
+#endif // NETWORK_ETHERNET
 }
 
 #endif //#ifdef ENABLE_SOFTAP

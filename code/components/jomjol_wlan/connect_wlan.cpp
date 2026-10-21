@@ -1,3 +1,6 @@
+#include "../../include/defines.h"
+
+#ifndef NETWORK_ETHERNET // Ethernet boards use connect_eth.cpp
 #include "connect_wlan.h"
 
 #include <string.h>
@@ -718,3 +721,4 @@ void WIFIDestroy()
 	esp_wifi_deinit();
 }
 
+#endif // NETWORK_ETHERNET

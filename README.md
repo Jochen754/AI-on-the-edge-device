@@ -13,6 +13,7 @@
 - [Download 🔽](#download-)
 - [Flashing the ESP32 💾](#flashing-the-esp32-)
 - [Flashing the SD Card 💾](#flashing-the-sd-card-)
+- [Ethernet / PoE (ESP32-S3-ETH) 🔌](#ethernet--poe-esp32-s3-eth-)
 - [Casing 🛠️](#casing-%EF%B8%8F)
 - [Donate ☕](#donate-)
 - [Support 💬](#support-)
@@ -137,7 +138,7 @@ The latest available version can be found on the [Releases page](https://github.
 <br>
 
 ## Flashing the ESP32 💾
-Initially, you will have to flash the ESP32 via a USB connection. Later updates are possible directly over the air (OTA using Wi-Fi).
+Initially, you will have to flash the ESP32 via a USB connection. Later updates are possible directly over the air (OTA using Wi-Fi, or LAN on Ethernet boards).
 
 There are different ways to flash your ESP32:
 - The preferred way is the [Web Installer and Console](https://jomjol.github.io/AI-on-the-edge-device/index.html), a browser-based tool to flash the ESP32 and extract the log over USB:  
@@ -155,6 +156,17 @@ See the [documentation](https://jomjol.github.io/AI-on-the-edge-device-docs/Inst
 The SD card can be set up automatically after the firmware is installed. See the [documentation](https://jomjol.github.io/AI-on-the-edge-device-docs/Installation/#remote-setup-using-the-built-in-access-point) for details. For this to work, the SD card must be FAT formatted (which is the default on a new SD card).
 
 Alternatively, the SD card can still be set up manually. See the [documentation](https://jomjol.github.io/AI-on-the-edge-device-docs/Installation/#3-sd-card) for details.
+
+---
+
+<br>
+
+## Ethernet / PoE (ESP32-S3-ETH) 🔌
+Besides the ESP32-CAM, the firmware also runs on the **ESP32-S3-ETH** board (ESP32-S3, W5500 Ethernet, optional PoE, OV2640/OV5640, microSD).
+The device is then connected by **LAN cable only** – WLAN is not used, `wlan.ini` is optional (DHCP and hostname `watermeter` by default) and the setup mode is served via LAN instead of an own access point.
+All other functions (web interface, MQTT, InfluxDB, webhook, REST API, OTA) are the same.
+
+Build environment: `esp32s3-eth`. Details, pin assignment, flashing and differences to the ESP32-CAM: [ESP32-S3-ETH.md](ESP32-S3-ETH.md).
 
 ---
 

@@ -17,3 +17,7 @@ If actual RSSI value is lower (more negative) than `RSSIThreshold`, all WIFI cha
 
 !!! Note
     It gets automatically transferred to `/wlan.ini` on the SD-Card at next startup.
+
+
+!!! Note
+    Not available on Ethernet boards (ESP32-S3-ETH): there is no WLAN, the parameter is hidden in the web interface.

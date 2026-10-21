@@ -190,11 +190,13 @@ int LoadWlanFromFile(std::string fn)
     }
     fclose(pFile);
 
-    /* Check if SSID is empty (mandatory parameter) */
+    /* Check if SSID is empty (mandatory parameter, not used with Ethernet) */
+#ifndef NETWORK_ETHERNET
     if (wlan_config.ssid.empty()) {
         LogFile.WriteToFile(ESP_LOG_ERROR, TAG, "SSID empty. Device init aborted!");
         return -2;
     }
+#endif // NETWORK_ETHERNET
 
     /* Check if password is empty (mandatory parameter) */
     /* Disabled see issue #2393

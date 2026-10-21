@@ -308,6 +308,23 @@ body, html {
    }
 
    function loadRSSI() {
+		// Ethernet boards have no WiFi signal
+		var xnet = new XMLHttpRequest();
+		xnet.onreadystatechange = function() {
+			if (this.readyState == 4) {
+				if (this.status == 200 && xnet.responseText == "Ethernet") {
+					document.getElementById('rssi').value = "Network: LAN (Ethernet)";
+				}
+				else {
+					loadWifiRSSI();
+				}
+			}
+		}
+		xnet.open("GET", getDomainname() + '/info?type=NetworkType', true);
+		xnet.send();
+	}
+
+   function loadWifiRSSI() {
 		url = getDomainname() + '/rssi';     
 		var xhttp = new XMLHttpRequest();
 		xhttp.onreadystatechange = function() {

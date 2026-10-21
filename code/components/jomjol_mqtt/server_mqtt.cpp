@@ -183,7 +183,9 @@ bool MQTThomeassistantDiscovery(int qos) {
     allSendsSuccessed |= sendHomeAssistantDiscoveryTopic("",     "fwVersion",       "Firmware Version",  "application-outline",      "",    "",                "",            "diagnostic", qos);
     allSendsSuccessed |= sendHomeAssistantDiscoveryTopic("",     "hostname",        "Hostname",          "network-outline",          "",    "",                "",            "diagnostic", qos);
     allSendsSuccessed |= sendHomeAssistantDiscoveryTopic("",     "freeMem",         "Free Memory",       "memory",                   "B",   "",                "measurement", "diagnostic", qos);
+#ifndef NETWORK_ETHERNET // No Wi-Fi signal on a wired connection
     allSendsSuccessed |= sendHomeAssistantDiscoveryTopic("",     "wifiRSSI",        "Wi-Fi RSSI",        "wifi",                     "dBm", "signal_strength", "",            "diagnostic", qos);
+#endif
     allSendsSuccessed |= sendHomeAssistantDiscoveryTopic("",     "CPUtemp",         "CPU Temperature",   "thermometer",              "°C",  "temperature",     "measurement", "diagnostic", qos);
     allSendsSuccessed |= sendHomeAssistantDiscoveryTopic("",     "interval",        "Interval",          "clock-time-eight-outline", "min",  "",               "measurement", "diagnostic", qos);
     allSendsSuccessed |= sendHomeAssistantDiscoveryTopic("",     "IP",              "IP",                "network-outline",           "",    "",               "",            "diagnostic", qos);
@@ -259,8 +261,10 @@ bool publishSystemData(int qos) {
     sprintf(tmp_char, "%lu", (long) getESPHeapSize());
     allSendsSuccessed |= MQTTPublish(maintopic + "/" + "freeMem", std::string(tmp_char), qos, retainFlag);
 
+#ifndef NETWORK_ETHERNET
     sprintf(tmp_char, "%d", get_WIFI_RSSI());
     allSendsSuccessed |= MQTTPublish(maintopic + "/" + "wifiRSSI", std::string(tmp_char), qos, retainFlag);
+#endif
 
     sprintf(tmp_char, "%d", (int)temperatureRead());
     allSendsSuccessed |= MQTTPublish(maintopic + "/" + "CPUtemp", std::string(tmp_char), qos, retainFlag);
