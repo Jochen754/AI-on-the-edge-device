@@ -102,6 +102,15 @@ esp_err_t info_get_handler(httpd_req_t *req)
         httpd_resp_sendstr(req, zw->c_str());
         return ESP_OK;        
     }
+    else if (_task.compare("NetworkType") == 0)
+    {
+#ifdef NETWORK_ETHERNET
+        httpd_resp_sendstr(req, "Ethernet");
+#else
+        httpd_resp_sendstr(req, "WLAN");
+#endif
+        return ESP_OK;
+    }
     else if (_task.compare("SSID") == 0)
     {
         std::string *zw;

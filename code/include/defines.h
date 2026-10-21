@@ -308,6 +308,55 @@
     #define FLASH_GPIO GPIO_NUM_4               // PIN for flashlight LED
     #define USE_PWM_LEDFLASH                    // if __LEDGLOBAL is defined, a global variable is used for LED control, otherwise locally and each time a new
 
+#elif defined(BOARD_ESP32_S3_ETH) // ESP32-S3-ETH (Waveshare design): ESP32-S3R8, W5500 Ethernet (PoE), OV2640/OV5640
+    // Network: Ethernet via W5500 (SPI) instead of WLAN
+    #define NETWORK_ETHERNET
+    #undef WLAN_USE_ROAMING_BY_SCANNING
+    #undef WLAN_USE_MESH_ROAMING
+
+    #define ETH_SPI_HOST     SPI2_HOST
+    #define ETH_SPI_CLOCK_MHZ 20
+    #define ETH_PIN_MISO     GPIO_NUM_12
+    #define ETH_PIN_MOSI     GPIO_NUM_11
+    #define ETH_PIN_SCLK     GPIO_NUM_13
+    #define ETH_PIN_CS       GPIO_NUM_14
+    #define ETH_PIN_INT      GPIO_NUM_10
+    #define ETH_PIN_RST      GPIO_NUM_9
+
+    // SD card (operated with SDMMC peripheral via GPIO matrix, 1-line mode)
+    //-------------------------------------------------
+    #define GPIO_SDCARD_CLK GPIO_NUM_7
+    #define GPIO_SDCARD_CMD GPIO_NUM_6
+    #define GPIO_SDCARD_D0  GPIO_NUM_5
+    #define GPIO_SDCARD_D1  GPIO_NUM_NC
+    #define GPIO_SDCARD_D2  GPIO_NUM_NC
+    #define GPIO_SDCARD_D3  GPIO_NUM_4          // CS of the card slot, kept high in 1-line mode
+
+    #define CAM_PIN_PWDN     GPIO_NUM_8         // "camera enable" of the board: high = camera off
+    #define CAM_PIN_RESET    GPIO_NUM_NC        //software reset will be performed
+    #define CAM_PIN_XCLK     GPIO_NUM_3
+    #define CAM_PIN_SIOD     GPIO_NUM_48
+    #define CAM_PIN_SIOC     GPIO_NUM_47
+
+    #define CAM_PIN_D7       GPIO_NUM_18
+    #define CAM_PIN_D6       GPIO_NUM_15
+    #define CAM_PIN_D5       GPIO_NUM_38
+    #define CAM_PIN_D4       GPIO_NUM_40
+    #define CAM_PIN_D3       GPIO_NUM_42
+    #define CAM_PIN_D2       GPIO_NUM_46
+    #define CAM_PIN_D1       GPIO_NUM_45
+    #define CAM_PIN_D0       GPIO_NUM_41
+    #define CAM_PIN_VSYNC    GPIO_NUM_1
+    #define CAM_PIN_HREF     GPIO_NUM_2
+    #define CAM_PIN_PCLK     GPIO_NUM_39
+
+    //Statusled + ClassControllCamera
+    #define BLINK_GPIO GPIO_NUM_17              // No status LED on the board: optional external LED (active low)
+
+    //ClassControllCamera
+    #define FLASH_GPIO GPIO_NUM_16              // No flash LED on the board: external LED (via transistor), PWM dimmable
+    #define USE_PWM_LEDFLASH                    // if __LEDGLOBAL is defined, a global variable is used for LED control, otherwise locally and each time a new
+
 #else
     #error "Board not selected"
 #endif  //Board PIN Map

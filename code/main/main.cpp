@@ -458,12 +458,27 @@ extern "C" void app_main(void)
     // Read WLAN parameter and start WIFI
     // ********************************************
     int iWLANStatus = LoadWlanFromFile(WLAN_CONFIG_FILE);
+#ifdef NETWORK_ETHERNET
+    if (iWLANStatus == -1)
+    { // Ethernet works without wlan.ini: DHCP and default hostname
+        LogFile.WriteToFile(ESP_LOG_INFO, TAG, "wlan.ini not found, Ethernet uses DHCP and hostname " + wlan_config.hostname);
+        iWLANStatus = 0;
+    }
+#endif
     if (iWLANStatus == 0)
     {
+#ifdef NETWORK_ETHERNET
+        LogFile.WriteToFile(ESP_LOG_INFO, TAG, "Network config loaded, init Ethernet...");
+#else
         LogFile.WriteToFile(ESP_LOG_INFO, TAG, "WLAN config loaded, init WIFI...");
+#endif
         if (wifi_init_sta() != ESP_OK)
         {
+#ifdef NETWORK_ETHERNET
+            LogFile.WriteToFile(ESP_LOG_ERROR, TAG, "Ethernet init failed. Device init aborted!");
+#else
             LogFile.WriteToFile(ESP_LOG_ERROR, TAG, "WIFI init failed. Device init aborted!");
+#endif
             StatusLED(WLAN_INIT, 3, true);
             return;
         }
@@ -494,7 +509,9 @@ extern "C" void app_main(void)
 
     // Set log level for wifi component to WARN level (default: INFO; only relevant for serial console)
     // ********************************************
+#ifndef NETWORK_ETHERNET
     esp_log_level_set("wifi", ESP_LOG_WARN);
+#endif
 
 #ifdef HEAP_TRACING_MAIN_WIFI
     ESP_ERROR_CHECK(heap_trace_stop());

@@ -775,11 +775,30 @@ string toLower(string in)
 }
 
 // CPU Temp
+#if CONFIG_IDF_TARGET_ESP32
 extern "C" uint8_t temprature_sens_read();
 float temperatureRead()
 {
 	return (temprature_sens_read() - 32) / 1.8;
 }
+#else
+// Newer chips (e.g. ESP32-S3) have no ROM function for this but a temperature sensor driver
+#include "driver/temperature_sensor.h"
+float temperatureRead()
+{
+	static temperature_sensor_handle_t sensor = NULL;
+	if (sensor == NULL) {
+		temperature_sensor_config_t config = TEMPERATURE_SENSOR_CONFIG_DEFAULT(-10, 80);
+		if (temperature_sensor_install(&config, &sensor) != ESP_OK || temperature_sensor_enable(sensor) != ESP_OK) {
+			sensor = NULL;
+			return 0;
+		}
+	}
+	float celsius = 0;
+	temperature_sensor_get_celsius(sensor, &celsius);
+	return celsius;
+}
+#endif
 
 time_t addDays(time_t startTime, int days)
 {

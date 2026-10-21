@@ -208,6 +208,23 @@
 		}
 
 		function loadRSSI() {
+			// Ethernet boards have no WiFi signal
+			var xnet = new XMLHttpRequest();
+			xnet.onreadystatechange = function() {
+				if (this.readyState == 4) {
+					if (this.status == 200 && xnet.responseText == "Ethernet") {
+						$('#rssi').html("Network: LAN (Ethernet)");
+					}
+					else {
+						loadWifiRSSI();
+					}
+				}
+			}
+			xnet.open("GET", domainname + '/info?type=NetworkType', true);
+			xnet.send();
+		}
+
+		function loadWifiRSSI() {
 			url = domainname + '/rssi';     
 			var xhttp = new XMLHttpRequest();
 			xhttp.onreadystatechange = function() {

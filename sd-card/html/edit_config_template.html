@@ -2244,6 +2244,22 @@ function InitIndivParameter() {
     _indexMQTTIdx.selectedIndex = 0;
 }
 
+// Ethernet boards: WiFi parameters are not used
+function HideWifiParameters() {
+    var xnet = new XMLHttpRequest();
+    xnet.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200 && xnet.responseText == "Ethernet") {
+            var row = document.querySelector('[unused_id="System_RSSIThreshold"]');
+            if (row) {
+                row.style.display = "none";
+            }
+        }
+    }
+    xnet.open("GET", getDomainname() + '/info?type=NetworkType', true);
+    xnet.send();
+}
+
+
 function UpdateInputIndividual(sel) {
     if (NUNBERSAkt != -1) {
         // ReadParameter(param, "PostProcessing", "PreValueUse", false, NUNBERSAkt);
@@ -2592,6 +2608,7 @@ function ReadParameterAll() {
     ReadParameter(param, "System", "TimeServer", true);
     ReadParameter(param, "System", "RSSIThreshold", true);
     ReadParameter(param, "System", "CPUFrequency", true);
+    HideWifiParameters();
 
     var sel = document.getElementById("Numbers_value1");
     UpdateInputIndividual(sel);
